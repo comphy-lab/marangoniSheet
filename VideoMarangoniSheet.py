@@ -16,7 +16,7 @@ matplotlib.rcParams['font.family'] = 'serif'
 matplotlib.rcParams['text.usetex'] = True
 matplotlib.rcParams['text.latex.preamble'] = r'\usepackage{amsmath}'
 
-def gettingFacets(filename, asy):
+def gettingFacets(filename):
     exe = ["./getFacet", filename]
     p = sp.Popen(exe, stdout=sp.PIPE, stderr=sp.PIPE)
     stdout, stderr = p.communicate()
@@ -31,20 +31,13 @@ def gettingFacets(filename, asy):
                 next_point = points[i + 1].split()
                 if next_point:
                     r1, z1 = float(current_point[1]), float(current_point[0])
-                    r2, z2 = float(next_point[1]), float(next_point[0])
-                    if asy:
-                        segment_variants = [
-                                ((r1, z1), (r2, z2)),
-                                ((-r1, z1), (-r2, z2))
-                            ]    
-                    else:    
-                        segment_variants = [
-                            ((r1, z1), (r2, z2)),
-                            ((-r1, z1), (-r2, z2)),
-                            ((r1, -z1), (r2, -z2)),
-                            ((-r1, -z1), (-r2, -z2))
-                        ]
-                    
+                    r2, z2 = float(next_point[1]), float(next_point[0])    
+                    segment_variants = [
+                        ((r1, z1), (r2, z2)),
+                        ((-r1, z1), (-r2, z2)),
+                        ((r1, -z1), (r2, -z2)),
+                        ((-r1, -z1), (-r2, -z2))
+                    ]
                     segments.extend(segment_variants)
     return segments
 
@@ -88,7 +81,7 @@ def gettingfield(filename, zmin, rmin, zmax, rmax, nr, Oh):
     return R, Z, D2, vel, U, V, nz
 
 
-def process_timestep(ti, folder, rmin, rmax, zmin, zmax, lw, asy, Oh, nr, Ldomain):    
+def process_timestep(ti, folder, rmin, rmax, zmin, zmax, lw, Oh, nr, Ldomain):    
     """Process a single timestep."""
     t = 0.01*ti
     snapshot_file = Path(f"intermediate/snapshot-{t:.4f}")
@@ -102,7 +95,7 @@ def process_timestep(ti, folder, rmin, rmax, zmin, zmax, lw, asy, Oh, nr, Ldomai
         print(f"{output_file} already present!")
         return
     
-    segs = gettingFacets(snapshot_file, asy)
+    segs = gettingFacets(snapshot_file)
     
     if not segs:
         print(f"Problem in the available file {snapshot_file}")
@@ -114,8 +107,8 @@ def process_timestep(ti, folder, rmin, rmax, zmin, zmax, lw, asy, Oh, nr, Ldomai
     fig, ax = plt.subplots()
     fig.set_size_inches(19.20, 10.80)
 
-    if not asy:
-        rmin, rmax, zmin, zmax = 0, Ldomain, -Ldomain/2, Ldomain/2
+
+    # rmin, rmax, zmin, zmax = 0, Ldomain, -Ldomain, Ldomain
         
     ax.plot([0, 0], [zmin, zmax],'-.',color='grey',linewidth=lw)
 
@@ -142,19 +135,15 @@ def process_timestep(ti, folder, rmin, rmax, zmin, zmax, lw, asy, Oh, nr, Ldomai
 
 def main():
     parser = argparse.ArgumentParser(description="Process facets for bubbles in sheets.")
-    parser.add_argument('--asy', action='store_true', help="If set, use asymmetric variants. Default is false.")
     parser.add_argument('--Oh', type=float, default=0.01, help="Oh value.")
     args = parser.parse_args()
     
     nGFS = 10000
-    Ldomain = 4
+    Ldomain = 6
     GridsPerR = 64
     nr = int(GridsPerR*Ldomain)
 
-    if args.asy:
-        rmin, rmax, zmin, zmax = 0, Ldomain, -Ldomain/2, Ldomain/2
-    else:
-        rmin, rmax, zmin, zmax = 0, Ldomain, 0, Ldomain/2
+    rmin, rmax, zmin, zmax = 0, Ldomain, -0.75*Ldomain, 0.75*Ldomain
     lw = 2
 
     folder = Path('Video')  # output folder
@@ -164,7 +153,7 @@ def main():
     
     # Prepare the partial function with fixed arguments
     # process_func = partial(process_timestep, folder=folder, rmin=rmin, rmax=rmax, zmin=zmin, zmax=zmax, lw=lw, asy=args.asy, nr=nr)
-    process_func = partial(process_timestep, folder=folder, rmin=rmin, rmax=rmax, zmin=zmin, zmax=zmax, lw=lw, asy=args.asy, Oh=args.Oh, nr=nr, Ldomain=Ldomain)
+    process_func = partial(process_timestep, folder=folder, rmin=rmin, rmax=rmax, zmin=zmin, zmax=zmax, lw=lw, Oh=args.Oh, nr=nr, Ldomain=Ldomain)
     
     # Use all available CPU cores
     num_processes = 5 

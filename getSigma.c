@@ -9,6 +9,7 @@
 
 double y_sigma, sigma_sigma;
 // scalar PhiC[];
+scalar sigmaf[];
 char filename[80];
 int main(int a, char const *arguments[])
 {
@@ -24,7 +25,8 @@ int main(int a, char const *arguments[])
   foreach(){
     if (kappa[] != nodata){
         y_sigma = y;
-        sigma_sigma = PhiC[];
+        // sigma_sigma = PhiC[];
+        sigma_sigma = sigmaf[];
         fprintf(ferr, "%g %g\n", y_sigma, sigma_sigma);
     }
   }

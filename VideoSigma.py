@@ -57,8 +57,8 @@ def process_timestep(ti, folder):
     fig, ax = plt.subplots()
     ax.set_title(f't = {t:.2f}')
     
-    ax.set_ylim([0,16])
-    ax.set_xlim([0,16])
+    ax.set_ylim([0,1])
+    ax.set_xlim([0,2])
     ax.plot(y, sigma, 'o', markeredgecolor='black')
 
     # plt.show()
