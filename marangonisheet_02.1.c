@@ -63,7 +63,7 @@ int main(int argc, char const *argv[])
     // Name of the restart file, used in writingFiles event.
     sprintf(dumpFile, "dump");
 
-    L0 = 2.0, w0 = 0.5;
+    L0 = 15.0, w0 = 0.5;
     Diff_C1 = D, Diff_C2 = D;
     rho1 = 1., rho2 = 0.001;
     mu1 = Oh, mu2 = 2e-5;
