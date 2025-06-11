@@ -1,4 +1,4 @@
-// Start with initial equilibrium shape
+// Sheet breakup by surface tension gradient || Start with the eqilibrium shape of another simulation
 #include "axi.h"
 #include "navier-stokes/centered.h"
 #include "two-phase-clsvof.h"

@@ -1,3 +1,4 @@
+// Sheet breakup by surface tension gradient || Initialized with gaussian surface tension profile
 #include "axi.h"
 #include "navier-stokes/centered.h"
 #include "two-phase-clsvof.h"

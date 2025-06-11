@@ -1,3 +1,5 @@
+// Sheet breakup by surface tension gradient || Initialized with exponential shape disturbance || Use advection diffusion for finite Peclet number
+// Correct boundary conditions
 #include "axi.h"
 #include "navier-stokes/centered.h"
 #include "two-phase-clsvof.h"
@@ -16,18 +18,9 @@ double GammaR, Oh, D, tmax, w0;
 char nameOut[80], dumpFile[80];
 
 PhiC[top] = neumann(0.0);
-// PhiC[bottom] = dirichlet(0.);
-
-// uf.n[bottom] = dirichlet(0.);
 uf.n[top] = dirichlet(0.);
-
-// u.n[bottom] = dirichlet(0.);
 u.n[top] = dirichlet(0.);
-
-// uf.t[bottom] = neumann(0.);
 uf.t[top] = neumann(0.);
-
-// u.t[bottom] = neumann(0.);
 u.t[top] = neumann(0.);
 
 uf.n[left] = dirichlet(0.);
@@ -35,8 +28,6 @@ uf.t[left] = neumann(0.);
 
 u.t[left] = neumann(0.);
 u.n[left] = dirichlet(0.);
-
-// d[bottom] = neumann(0.);
 d[top] = neumann(0.);
 
 scalar sigmaf[];
@@ -81,7 +72,6 @@ event init(i = 0)
     {
         foreach ()
         {
-          //  d[] = -( x - 1 + ((double)L0) / ((double)N) / 2. + 0.1 * exp(-y * y / 0.1));
              d[] = -(x  - 1.00001);
         }
 
