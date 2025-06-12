@@ -77,7 +77,7 @@ event init(i = 0)
 
         foreach ()
         {
-            PhiC[] = (1/(w0*sqrt(2*pi)))*exp(-y*y/(2*sq(w0))); // Gaussian profile with 
+            PhiC[] = d[] > 0 ? (1/(w0*sqrt(2*pi)))*exp(-y*y/(2*sq(w0))) : 0; // Gaussian profile with 
             sigmaf[] = max(1 - GammaR * PhiC[], 1e-3);
         }
     }
