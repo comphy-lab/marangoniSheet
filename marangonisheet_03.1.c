@@ -15,7 +15,7 @@
 
 int MAXlevel;
 scalar c[], * stracers = {c};
-double GammaR, Oh, D, tmax, w0;
+double GammaR, Oh, D, D_air, alpha_inv, tmax, w0;
 char nameOut[80], dumpFile[80];
 
 // PhiC[top] = neumann(0.0);
@@ -39,8 +39,10 @@ int main(int argc, char const *argv[])
     Oh = atof(argv[2]);
     GammaR = atof(argv[3]);
     D = atof(argv[4]);
-    tmax = atof(argv[5]);
-    if (argc < 6)
+    D_air = atof(argv[5]);
+    alpha_inv = atof(argv[6]);
+    tmax = atof(argv[7]);
+    if (argc < 8)
     {
         fprintf(ferr, "Lack of command line arguments. Check! Need %d more arguments\n", 6 - argc);
         return 1;
@@ -57,8 +59,8 @@ int main(int argc, char const *argv[])
 
     L0 = 15.0, w0 = 0.5;
     // Diff_C1 = D, Diff_C2 = D;
-    c.D1 = D, c.D2 = D/1e3; 
-    c.alpha_inv = 1e-2;
+    c.D1 = D, c.D2 = D_air; 
+    c.alpha_inv = alpha_inv;
     rho1 = 1., rho2 = 0.001;
     mu1 = Oh, mu2 = 2e-5;
 
