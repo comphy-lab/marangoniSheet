@@ -108,7 +108,7 @@ event logWriting(i++)
         {
             fprintf(ferr, "i dt t ke\n");
             fp = fopen("log", "w");
-            fprintf(fp, "Level %d, Oh %2.1e, GammaR %4.3f, D %4.3f\n", MAXlevel, Oh, GammaR, D);
+            fprintf(fp, "Level %d, Oh %2.1e, GammaR %4.3f, D %4.3f, D_air %4.3f, alpha_inv %4.3f\n", MAXlevel, Oh, GammaR, D, D_air, alpha_inv);
             fprintf(fp, "i dt t ke\n");
         }
         else
