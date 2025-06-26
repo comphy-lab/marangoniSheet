@@ -1,4 +1,4 @@
-// Sheet breakup by surface tension gradient || Initialized with exponential shape disturbance || Use henry.h for finite Peclet number
+// Sheet breakup by surface tension gradient || Use henry.h for finite Peclet number
 // Correct boundary conditions
 #include "axi.h"
 #include "navier-stokes/centered.h"
