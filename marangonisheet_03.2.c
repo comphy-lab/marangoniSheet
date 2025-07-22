@@ -82,7 +82,7 @@ event init(i = 0)
 
         foreach ()
         {
-            c[] = d[] > 0 ? (1/(w0*sqrt(2*pi)))*exp(-y*y/(2*sq(w0))) : 0 ; // Gaussian profile with 
+            c[] = d[] > 0 ? exp(-y*y/(2*sq(w0))) : 0 ; // Gaussian profile with 
             sigmaf[] = max(1 - GammaR * c[], 1e-3);
         }
     }
