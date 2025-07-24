@@ -2,12 +2,15 @@
 
 #include "axi.h"
 #include "navier-stokes/centered.h"
-#include "fractions.h"
+#include "two-phase-clsvof.h"
+#include "integral.h"
+#include "henry_02.h"
 
 char filename[80];
 int nx, ny, len;
 double xmin, ymin, xmax, ymax, Deltax, Deltay, Oh = 0.;
-scalar f[], D2c[], vel[];
+scalar vel[], fux[], fuy[];
+scalar c[], * stracers = {c};
 scalar *list = NULL;
 
 int main(int a, char const *arguments[])
@@ -20,10 +23,10 @@ int main(int a, char const *arguments[])
     ny = atoi(arguments[6]);
     Oh = atof(arguments[7]);
 
-    list = list_add(list, D2c);
+    list = list_add(list, c);
     list = list_add(list, vel);
-    list = list_add(list, u.x);
-    list = list_add(list, u.y);
+    list = list_add(list, fux);
+    list = list_add(list, fuy);
 
     // boundary conditions
     u.n[right] = neumann(0.);
@@ -35,17 +38,17 @@ int main(int a, char const *arguments[])
 
     foreach ()
     {
-        double D11 = (u.y[0, 1] - u.y[0, -1]) / (2 * Delta);
-        double D22 = (u.y[] / y);
-        double D33 = (u.x[1, 0] - u.x[-1, 0]) / (2 * Delta);
-        double D13 = 0.5 * ((u.y[1, 0] - u.y[-1, 0] + u.x[0, 1] - u.x[0, -1]) / (2 * Delta));
-        double D2 = (sq(D11) + sq(D22) + sq(D33) + 2.0 * sq(D13));
-        D2c[] = 2 * (clamp(f[], 0., 1.) * (Oh - 2e-2 * Oh) + 2e-2 * Oh) * D2;
+        // double D11 = (u.y[0, 1] - u.y[0, -1]) / (2 * Delta);
+        // double D22 = (u.y[] / y);
+        // double D33 = (u.x[1, 0] - u.x[-1, 0]) / (2 * Delta);
+        // double D13 = 0.5 * ((u.y[1, 0] - u.y[-1, 0] + u.x[0, 1] - u.x[0, -1]) / (2 * Delta));
+        // double D2 = (sq(D11) + sq(D22) + sq(D33) + 2.0 * sq(D13));
 
-        D2c[] = (D2c[] > 0.) ? log(D2c[]) / log(10) : -10;
-        vel[] = sqrt(sq(u.x[]) + sq(u.y[]));
+        vel[] = clamp(f[], 0., 1.) * sqrt(sq(u.x[]) + sq(u.y[]));
+        fux[] = clamp(f[], 0., 1.) * u.x[];
+        fuy[] = clamp(f[], 0., 1.) * u.y[];
     }
-    boundary((scalar *){D2c, vel});
+    boundary((scalar *){vel});
 
     FILE *fp = ferr;
     Deltay = (double)(ymax - ymin) / (ny);
