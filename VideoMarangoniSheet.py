@@ -53,7 +53,7 @@ def gettingfield(filename, zmin, rmin, zmax, rmax, nr, Oh):
     p = sp.Popen(exe, stdout=sp.PIPE, stderr=sp.PIPE)
     stdout, stderr = p.communicate()
     lines = stderr.decode("utf-8").split("\n")
-    Rtemp, Ztemp, D2temp, veltemp, Utemp, Vtemp = [],[],[],[],[],[]
+    Rtemp, Ztemp, ctemp, veltemp, Utemp, Vtemp = [],[],[],[],[],[]
 
     for i in range(len(lines)):
         values = lines[i].split(" ")
@@ -62,14 +62,14 @@ def gettingfield(filename, zmin, rmin, zmax, rmax, nr, Oh):
         else:
             Ztemp.append(float(values[0]))
             Rtemp.append(float(values[1]))
-            D2temp.append(float(values[2]))
+            ctemp.append(float(values[2]))
             veltemp.append(float(values[3]))
             Utemp.append(float(values[4]))
             Vtemp.append(float(values[5]))
 
     R = np.asarray(Rtemp)
     Z = np.asarray(Ztemp)
-    D2 = np.asarray(D2temp)
+    c = np.asarray(ctemp)
     vel = np.asarray(veltemp)
     U = np.asarray(Utemp)
     V = np.asarray(Vtemp)
@@ -80,12 +80,12 @@ def gettingfield(filename, zmin, rmin, zmax, rmax, nr, Oh):
 
     R.resize((nz, nr))
     Z.resize((nz, nr))
-    D2.resize((nz, nr))
+    c.resize((nz, nr))
     vel.resize((nz, nr))
     U.resize((nz, nr))
     V.resize((nz, nr))
 
-    return R, Z, D2, vel, U, V, nz
+    return R, Z, c, vel, U, V, nz
 
 
 def process_timestep(ti, folder, rmin, rmax, zmin, zmax, lw, asy, Oh, nr, Ldomain):    
@@ -108,7 +108,7 @@ def process_timestep(ti, folder, rmin, rmax, zmin, zmax, lw, asy, Oh, nr, Ldomai
         print(f"Problem in the available file {snapshot_file}")
         return
     
-    R, Z, D2, vel, U, V, nz = gettingfield(snapshot_file, zmin, rmin, zmax, rmax, nr, Oh)
+    R, Z, c, vel, U, V, nz = gettingfield(snapshot_file, zmin, rmin, zmax, rmax, nr, Oh)
     # Part to plot
     AxesLabel, TickLabel = [50, 35]
     fig, ax = plt.subplots()
@@ -134,36 +134,56 @@ def process_timestep(ti, folder, rmin, rmax, zmin, zmax, lw, asy, Oh, nr, Ldomai
     ax.set_xlim(-rmax, rmax)
     ax.set_ylim(zmin, zmax)
     
-    velmax, velmin = 1, 0.00
-    uymax, uymin = 0.1, -0.1
+    cmax, cmin = 1, 0.00
+    velmax, velmin = 0.1, 0.0
     # print(f"max D2 is {d2max} and min D2 is {d2min}")
     # print(f"max vel is {velmax} and min vel is {velmin}")
     
-    
-    if asy:
-        cntrl1 = ax.imshow(vel, cmap="hot_r", interpolation='Bilinear', origin='lower', extent=[rmin, -rmax, zmin, zmax], vmax=velmax, vmin=velmin)
-        cntrl2 = ax.imshow(D2, cmap="hot_r", interpolation='Bilinear', origin='lower', extent=[rmin, rmax, zmin, zmax], vmax=uymax, vmin=uymin)
-    
-    else:   
-        rmin, rmax, zmin, zmax = 0, Ldomain, 0, Ldomain/2
-        cntrl1 = ax.imshow(vel, cmap="hot_r", interpolation='Bilinear', origin='lower', extent=[rmin, -rmax, zmin, zmax], vmax=velmax, vmin=velmin)
-        cntrl2 = ax.imshow(D2, cmap="PuOr", interpolation='Bilinear', origin='lower', extent=[rmin, rmax, zmin, zmax], vmax=uymax, vmin=uymin)
-        cntrl1 = ax.imshow(vel, cmap="hot_r", interpolation='Bilinear', origin='lower', extent=[rmin, -rmax, zmin, -zmax], vmax=velmax, vmin=velmin)
-        cntrl2 = ax.imshow(D2, cmap="PuOr", interpolation='Bilinear', origin='lower', extent=[rmin, rmax, zmin, -zmax], vmax=uymax, vmin=uymin)
+    rmin, rmax, zmin, zmax = 0, Ldomain, 0, Ldomain/2
+    cntrl1 = ax.imshow(c, cmap="hot_r", interpolation='Bilinear', origin='lower', extent=[rmin, -rmax, zmin, zmax], vmax=cmax, vmin=cmin)
+    cntrl2 = ax.imshow(vel, cmap="Blues", interpolation='Bilinear', origin='lower', extent=[rmin, rmax, zmin, zmax], vmax=velmax, vmin=velmin)
+    cntrl1 = ax.imshow(c, cmap="hot_r", interpolation='Bilinear', origin='lower', extent=[rmin, -rmax, zmin, -zmax], vmax=cmax, vmin=cmin)
+    cntrl2 = ax.imshow(vel, cmap="Blues", interpolation='Bilinear', origin='lower', extent=[rmin, rmax, zmin, -zmax], vmax=velmax, vmin=velmin)
 
-        l, b, w, h = ax.get_position().bounds
-        cb1 = fig.add_axes([l+0.05*w, b-0.05, 0.40*w, 0.03])
-        c1 = plt.colorbar(cntrl1,cax=cb1,orientation='horizontal')
-        c1.set_label(r"$c$",fontsize=TickLabel, labelpad=-25)
-        c1.ax.tick_params(labelsize=TickLabel)
-        c1.ax.xaxis.set_major_formatter(StrMethodFormatter('{x:,.2f}'))
-        c1.set_ticks([velmax, velmin])
-        cb2 = fig.add_axes([l+0.55*w, b-0.05, 0.40*w, 0.03])
-        c2 = plt.colorbar(cntrl2,cax=cb2,orientation='horizontal')
-        c2.ax.tick_params(labelsize=TickLabel)
-        c2.set_label(r'$\|\mathbf{v}\|/\sqrt{\gamma/\rho R_0}$',fontsize=TickLabel, labelpad=-25)
-        c2.ax.xaxis.set_major_formatter(StrMethodFormatter('{x:,.1f}')) 
-        c2.set_ticks([uymax, uymin])
+    l, b, w, h = ax.get_position().bounds
+    cb1 = fig.add_axes([l+0.05*w, b-0.05, 0.40*w, 0.03])
+    c1 = plt.colorbar(cntrl1,cax=cb1,orientation='horizontal')
+    c1.set_label(r"$c$",fontsize=TickLabel, labelpad=-25)
+    c1.ax.tick_params(labelsize=TickLabel)
+    c1.ax.xaxis.set_major_formatter(StrMethodFormatter('{x:,.2f}'))
+    c1.set_ticks([cmax, cmin])
+    cb2 = fig.add_axes([l+0.55*w, b-0.05, 0.40*w, 0.03])
+    c2 = plt.colorbar(cntrl2,cax=cb2,orientation='horizontal')
+    c2.ax.tick_params(labelsize=TickLabel)
+    c2.set_label(r'$\|\mathbf{v}\|/\sqrt{\gamma/\rho R_0}$',fontsize=TickLabel, labelpad=-25)
+    c2.ax.xaxis.set_major_formatter(StrMethodFormatter('{x:,.1f}')) 
+    c2.set_ticks([velmax, velmin])
+
+    n = 12  # Adjust this value to control the density
+    R_reduced = R[::n, ::n]
+    Z_reduced = Z[::n, ::n]
+    U_reduced = U[::n, ::n]
+    V_reduced = V[::n, ::n]
+
+    magnitude = np.sqrt(U_reduced**2 + V_reduced**2)
+
+    mask = (magnitude > 1e-6)
+    R_reduced = R_reduced[mask]
+    Z_reduced = Z_reduced[mask]
+    U_reduced = U_reduced[mask]
+    V_reduced = V_reduced[mask]
+    magnitude = magnitude[mask]
+    U_reduced = U_reduced/magnitude
+    V_reduced = V_reduced/magnitude
+
+    
+    # Plot vectors
+    # ax.quiver(-R_filtered, Z_filtered, -V_filtered, U_filtered, color='black', scale=20, headwidth=3, headlength=4, headaxislength=4, width=0.002)
+    # ax.quiver(-R_filtered, Z_filtered, -V_filtered, U_filtered)
+    ax.quiver(R_reduced, Z_reduced, V_reduced, U_reduced, color='black', scale=75, headwidth=3.5, headlength=4, headaxislength=3.8, width=0.0018)
+    ax.quiver(R_reduced[Z_reduced > 1e-2], -Z_reduced[Z_reduced > 1e-2], V_reduced[Z_reduced > 1e-2], -U_reduced[Z_reduced > 1e-2], color='black', scale=75, headwidth=3.5, headlength=4, headaxislength=3.8, width=0.0018)
+    # ax.quiver(R_filtered, Z_filtered, V_filtered, U_filtered, color='#1F77B4', scale=10, headwidth=3, headlength=4, headaxislength=4, width=0.002)     
+    # ax.quiver(R, Z, ux, uy, color='black', scale=1000)
     
     ax.axis('off')
     # plt.show()
