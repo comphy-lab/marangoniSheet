@@ -3,10 +3,11 @@
 #include "axi.h"
 #include "navier-stokes/centered.h"
 #include "fractions.h"
+#include "curvature.h"
 
 char filename[80], nameTrack[80];
 scalar * list = NULL;
-scalar f[];
+scalar f[], X[];
 
 int main(int a, char const *arguments[])
 {
@@ -18,16 +19,18 @@ int main(int a, char const *arguments[])
   double xmax = -HUGE;
   double y_xmax = 0;
   
-  foreach(){
-    if (x > xmax && f[] > 1-1e-3 && y < 0.05)
-      {
-        xmax = x;
-        y_xmax = y;
-      }
-  }
+  // foreach(){
+  //   if (x > xmax && f[] > 1-1e-3 && y < 0.05)
+  //     {
+  //       xmax = x;
+  //       y_xmax = y;
+  //     }
+  // }
+
+  position (f, X, {1,0});
 
   FILE * fp = ferr;
-  fprintf(ferr, "%f %7.6e %7.6e\n", t,  xmax, y_xmax);
+  fprintf(ferr, "%f %7.6e %7.6e\n", t, statsf(X).min, y_xmax);
   fflush (fp);
   fclose (fp);
 }
